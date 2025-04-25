@@ -1,0 +1,6 @@
+pandas
+scikit-learn
+numpy
+holidays
+psycopg2-binary
+sqlalchemy
