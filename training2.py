@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[16]:
+# In[10]:
 
 
 #!/usr/bin/env python
@@ -33,7 +33,7 @@ engine = create_engine(connection_string)
 df = pd.read_sql_table("streckentabelle", con=engine)
 
 
-# In[17]:
+# In[11]:
 
 
 # In[18]:
@@ -104,7 +104,7 @@ df["planned_hour_from"] = df["planned_departure_from"].apply(lambda t: datetime.
 df["day_period"] = df["planned_hour_from"].apply(map_day_period)
 
 
-# In[18]:
+# In[12]:
 
 
 #ENCODER
@@ -123,7 +123,7 @@ df["day_period"] = le_day_period.fit_transform(df["day_period"])
 
 
 
-# In[19]:
+# In[13]:
 
 
 from sklearn.ensemble import RandomForestRegressor
@@ -149,11 +149,15 @@ target_col = "arrival_delay_to"
 df_train.rename(columns=lambda x: str(x), inplace=True)
 df_val.rename(columns=lambda x: str(x), inplace=True)
 
+# MODEL
 model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(df_train[feature_cols], df_train[target_col])
 
 
-# In[20]:
+# In[14]:
+
+
+# In[1]:
 
 
 #WAHRSCHEINLICHKEIT
@@ -208,14 +212,13 @@ with open('model.pkl', 'wb') as f:
 with open('encoders.pkl', 'wb') as f:
     pickle.dump({
         'le_from': le_from,
-        'le_to': le_to,
-        'le_day_period': le_day_period,
-        'le_wetter': le_wetter
+        'le_to': le_to
     }, f)
-
 
 print("Model and encoders saved.")
 
+
+# In[ ]:
 
 
 
@@ -223,7 +226,7 @@ with open('classifier.pkl', 'wb') as f:
     pickle.dump(clf, f)
 
 
-
+# In[ ]:
 
 
 class_mapping = {
