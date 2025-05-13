@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[10]:
+# In[16]:
 
 
 #!/usr/bin/env python
@@ -33,7 +33,7 @@ engine = create_engine(connection_string)
 df = pd.read_sql_table("streckentabelle", con=engine)
 
 
-# In[11]:
+# In[17]:
 
 
 # In[18]:
@@ -88,7 +88,7 @@ df["is_holiday"] = df["planned_arrival_date_from"].dt.date.apply(lambda x: 1 if 
 df["is_peak_time"] = df["planned_hour_from"].apply(lambda x: 1 if 7 <= x <= 9 or 16 <= x <= 19 else 0)
 
 # DAY PERIOD (0–6, 6–12, 12–18, 18–24)
-
+# Saat dilimini belirleyen fonksiyon
 def map_day_period(hour):
     if 0 <= hour < 6:
         return "0-6"
@@ -99,12 +99,12 @@ def map_day_period(hour):
     else:
         return "18-0"
 
-
+# planned_hour_from sütunu zaten varsa bunu kullanarak day_period ekle
 df["planned_hour_from"] = df["planned_departure_from"].apply(lambda t: datetime.combine(date.today(), t)).dt.hour
 df["day_period"] = df["planned_hour_from"].apply(map_day_period)
 
 
-# In[12]:
+# In[18]:
 
 
 #ENCODER
@@ -123,7 +123,7 @@ df["day_period"] = le_day_period.fit_transform(df["day_period"])
 
 
 
-# In[13]:
+# In[19]:
 
 
 from sklearn.ensemble import RandomForestRegressor
@@ -149,15 +149,11 @@ target_col = "arrival_delay_to"
 df_train.rename(columns=lambda x: str(x), inplace=True)
 df_val.rename(columns=lambda x: str(x), inplace=True)
 
-# MODEL
 model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(df_train[feature_cols], df_train[target_col])
 
 
-# In[14]:
-
-
-# In[1]:
+# In[20]:
 
 
 #WAHRSCHEINLICHKEIT
@@ -204,7 +200,7 @@ clf.fit(df_train_cls[feature_cols], df_train_cls["delay_class"])
 
 import pickle
 
-# Modeli kaydet
+
 with open('model.pkl', 'wb') as f:
     pickle.dump(model, f)
 
@@ -212,13 +208,14 @@ with open('model.pkl', 'wb') as f:
 with open('encoders.pkl', 'wb') as f:
     pickle.dump({
         'le_from': le_from,
-        'le_to': le_to
+        'le_to': le_to,
+        'le_day_period': le_day_period,
+        'le_wetter': le_wetter
     }, f)
+
 
 print("Model and encoders saved.")
 
-
-# In[ ]:
 
 
 
@@ -226,7 +223,7 @@ with open('classifier.pkl', 'wb') as f:
     pickle.dump(clf, f)
 
 
-# In[ ]:
+
 
 
 class_mapping = {
@@ -244,6 +241,7 @@ with open('class_mapping.pkl', 'wb') as f:
 
 
 # In[ ]:
+
 
 
 
