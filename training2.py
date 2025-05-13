@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[10]:
 
 
 #!/usr/bin/env python
@@ -33,7 +33,7 @@ engine = create_engine(connection_string)
 df = pd.read_sql_table("streckentabelle", con=engine)
 
 
-# In[2]:
+# In[11]:
 
 
 # In[18]:
@@ -99,17 +99,12 @@ def map_day_period(hour):
     else:
         return "18-0"
 
+
 df["planned_hour_from"] = df["planned_departure_from"].apply(lambda t: datetime.combine(date.today(), t)).dt.hour
 df["day_period"] = df["planned_hour_from"].apply(map_day_period)
 
 
-# In[3]:
-
-
-print(df.columns)
-
-
-# In[4]:
+# In[12]:
 
 
 #ENCODER
@@ -128,7 +123,7 @@ df["day_period"] = le_day_period.fit_transform(df["day_period"])
 
 
 
-# In[5]:
+# In[13]:
 
 
 from sklearn.ensemble import RandomForestRegressor
@@ -148,7 +143,7 @@ df_train = df[df["planned_arrival_date_from"].dt.date.isin(train_days)].copy()
 df_val = df[df["planned_arrival_date_from"].dt.date.isin(val_days)].copy()
 
 # Features
-feature_cols = ["station_name_from", "station_name_to", "train_number", "day_of_week","planned_hour_from", "soll_dauer", "reihenfolge_from","station_avg_delay_7_30","train_avg_delay_7_30","is_weekend","is_holiday","is_peak_time","day_period"]
+feature_cols = ["station_name_from", "station_name_to", "train_number", "day_of_week","planned_hour_from", "soll_dauer", "reihenfolge_from","station_avg_delay_7_30","train_avg_delay_7_30","is_weekend","is_holiday","is_peak_time","day_period","wetter"]
 target_col = "arrival_delay_to"
 
 df_train.rename(columns=lambda x: str(x), inplace=True)
@@ -159,7 +154,7 @@ model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(df_train[feature_cols], df_train[target_col])
 
 
-# In[6]:
+# In[14]:
 
 
 # In[1]:
@@ -204,17 +199,17 @@ clf.fit(df_train_cls[feature_cols], df_train_cls["delay_class"])
 # In[ ]:
 
 
-# In[9]:
+# In[15]:
 
 
 import pickle
 
 # Modeli kaydet
-with open('model2.pkl', 'wb') as f:
+with open('model.pkl', 'wb') as f:
     pickle.dump(model, f)
 
-# Label Encoders'ları da kaydet (prediction sırasında lazım olacak)
-with open('encoders2.pkl', 'wb') as f:
+
+with open('encoders.pkl', 'wb') as f:
     pickle.dump({
         'le_from': le_from,
         'le_to': le_to
@@ -227,7 +222,7 @@ print("Model and encoders saved.")
 
 
 
-with open('classifier2.pkl', 'wb') as f:
+with open('classifier.pkl', 'wb') as f:
     pickle.dump(clf, f)
 
 
@@ -244,7 +239,7 @@ class_mapping = {
 
 
 
-with open('class_mapping2.pkl', 'wb') as f:
+with open('class_mapping.pkl', 'wb') as f:
     pickle.dump(class_mapping, f)
 
 
