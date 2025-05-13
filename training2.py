@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[1]:
+
+
+#!/usr/bin/env python
+# coding: utf-8
+
 # In[17]:
 
 
@@ -25,6 +31,9 @@ db_name = 'postgres'
 connection_string = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 engine = create_engine(connection_string)
 df = pd.read_sql_table("streckentabelle", con=engine)
+
+
+# In[2]:
 
 
 # In[18]:
@@ -65,7 +74,7 @@ df = df.dropna(subset=["arrival_delay_to"])
 df["planned_departure_from_dt"] = df["planned_departure_from"].apply(lambda t: datetime.combine(date.today(), t))
 df["planned_hour_from"] = df["planned_departure_from_dt"].dt.hour
 
-####### NOT IN RANDOM FOREST
+
 
 #WEEKEND  1=weekend
 df["is_weekend"] = df["day_of_week"].apply(lambda x: 1 if x >= 5 else 0)
@@ -78,22 +87,48 @@ df["is_holiday"] = df["planned_arrival_date_from"].dt.date.apply(lambda x: 1 if 
 #PEAK TIME
 df["is_peak_time"] = df["planned_hour_from"].apply(lambda x: 1 if 7 <= x <= 9 or 16 <= x <= 19 else 0)
 
+# DAY PERIOD (0–6, 6–12, 12–18, 18–24)
 
-# In[19]:
+def map_day_period(hour):
+    if 0 <= hour < 6:
+        return "0-6"
+    elif 6 <= hour < 12:
+        return "6-12"
+    elif 12 <= hour < 18:
+        return "12-18"
+    else:
+        return "18-0"
+
+df["planned_hour_from"] = df["planned_departure_from"].apply(lambda t: datetime.combine(date.today(), t)).dt.hour
+df["day_period"] = df["planned_hour_from"].apply(map_day_period)
+
+
+# In[3]:
+
+
+print(df.columns)
+
+
+# In[4]:
 
 
 #ENCODER
 
+from sklearn.preprocessing import LabelEncoder
+
 le_from = LabelEncoder()
 le_to = LabelEncoder()
-le_type = LabelEncoder()
+le_wetter = LabelEncoder()
+le_day_period = LabelEncoder()
 
 df["station_name_from"] = le_from.fit_transform(df["station_name_from"])
 df["station_name_to"] = le_to.fit_transform(df["station_name_to"])
-df["train_classification"] = le_type.fit_transform(df["train_classification"])
+df["wetter"] = le_wetter.fit_transform(df["wetter"])
+df["day_period"] = le_day_period.fit_transform(df["day_period"])
 
 
-# In[20]:
+
+# In[5]:
 
 
 from sklearn.ensemble import RandomForestRegressor
@@ -112,8 +147,8 @@ val_days = unique_days[n_train_days:]
 df_train = df[df["planned_arrival_date_from"].dt.date.isin(train_days)].copy()
 df_val = df[df["planned_arrival_date_from"].dt.date.isin(val_days)].copy()
 
-# Features for Random Forest
-feature_cols = ["station_name_from", "station_name_to", "train_number", "day_of_week","planned_hour_from", "soll_dauer", "reihenfolge_from","station_avg_delay_7_30","train_avg_delay_7_30"]
+# Features
+feature_cols = ["station_name_from", "station_name_to", "train_number", "day_of_week","planned_hour_from", "soll_dauer", "reihenfolge_from","station_avg_delay_7_30","train_avg_delay_7_30","is_weekend","is_holiday","is_peak_time","day_period"]
 target_col = "arrival_delay_to"
 
 df_train.rename(columns=lambda x: str(x), inplace=True)
@@ -123,6 +158,8 @@ df_val.rename(columns=lambda x: str(x), inplace=True)
 model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(df_train[feature_cols], df_train[target_col])
 
+
+# In[6]:
 
 
 # In[1]:
@@ -150,15 +187,15 @@ df_class["delay_class"] = df_class["arrival_delay_to"].apply(classify_delay)
 
 
 
-# 2. Train/Val Split (classification için)
+
 df_train_cls = df_class[df_class["planned_arrival_date_from"].dt.date.isin(train_days)].copy()
 df_val_cls = df_class[df_class["planned_arrival_date_from"].dt.date.isin(val_days)].copy()
 
-# 3. Quoted name fix
+
 df_train_cls.rename(columns=lambda x: str(x), inplace=True)
 df_val_cls.rename(columns=lambda x: str(x), inplace=True)
 
-# 4. Model kur
+
 clf = RandomForestClassifier(n_estimators=100, random_state=42)
 clf.fit(df_train_cls[feature_cols], df_train_cls["delay_class"])
 
@@ -167,18 +204,20 @@ clf.fit(df_train_cls[feature_cols], df_train_cls["delay_class"])
 # In[ ]:
 
 
+# In[9]:
+
+
 import pickle
 
 # Modeli kaydet
-with open('model.pkl', 'wb') as f:
+with open('model2.pkl', 'wb') as f:
     pickle.dump(model, f)
 
 # Label Encoders'ları da kaydet (prediction sırasında lazım olacak)
-with open('encoders.pkl', 'wb') as f:
+with open('encoders2.pkl', 'wb') as f:
     pickle.dump({
         'le_from': le_from,
-        'le_to': le_to,
-        'le_type': le_type
+        'le_to': le_to
     }, f)
 
 print("Model and encoders saved.")
@@ -187,8 +226,8 @@ print("Model and encoders saved.")
 # In[ ]:
 
 
-# Classification modelini kaydet
-with open('classifier.pkl', 'wb') as f:
+
+with open('classifier2.pkl', 'wb') as f:
     pickle.dump(clf, f)
 
 
@@ -204,7 +243,12 @@ class_mapping = {
 }
 
 
-# Class mapping'i kaydet
-with open('class_mapping.pkl', 'wb') as f:
+
+with open('class_mapping2.pkl', 'wb') as f:
     pickle.dump(class_mapping, f)
+
+
+# In[ ]:
+
+
 
