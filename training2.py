@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[12]:
 
 
 #!/usr/bin/env python
@@ -33,7 +33,7 @@ engine = create_engine(connection_string)
 df = pd.read_sql_table("streckentabelle1103", con=engine)
 
 
-# In[2]:
+# In[13]:
 
 
 # In[18]:
@@ -103,10 +103,13 @@ def map_day_period(hour):
 df["planned_hour_from"] = df["planned_departure_from"].apply(lambda t: datetime.combine(date.today(), t)).dt.hour
 df["day_period"] = df["planned_hour_from"].apply(map_day_period)
 
+# WETTER
 df["wetter"] = df["wetter"].fillna("bewölkt")
+df["wetter"] = df["wetter"].replace("unbekannt", "bewölkt")
 
 
-# In[3]:
+
+# In[14]:
 
 
 #ENCODER
@@ -125,7 +128,7 @@ df["day_period"] = le_day_period.fit_transform(df["day_period"])
 
 
 
-# In[4]:
+# In[15]:
 
 
 from sklearn.ensemble import RandomForestRegressor
@@ -155,7 +158,7 @@ model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(df_train[feature_cols], df_train[target_col])
 
 
-# In[5]:
+# In[16]:
 
 
 #WAHRSCHEINLICHKEIT
@@ -197,7 +200,7 @@ clf.fit(df_train_cls[feature_cols], df_train_cls["delay_class"])
 # In[ ]:
 
 
-# In[6]:
+# In[17]:
 
 
 import pickle
