@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[10]:
+# In[1]:
 
 
 #!/usr/bin/env python
@@ -30,10 +30,10 @@ db_name = 'postgres'
 
 connection_string = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 engine = create_engine(connection_string)
-df = pd.read_sql_table("streckentabelle", con=engine)
+df = pd.read_sql_table("streckentabelle1103", con=engine)
 
 
-# In[11]:
+# In[2]:
 
 
 # In[18]:
@@ -103,8 +103,10 @@ def map_day_period(hour):
 df["planned_hour_from"] = df["planned_departure_from"].apply(lambda t: datetime.combine(date.today(), t)).dt.hour
 df["day_period"] = df["planned_hour_from"].apply(map_day_period)
 
+df["wetter"] = df["wetter"].fillna("bewölkt")
 
-# In[12]:
+
+# In[3]:
 
 
 #ENCODER
@@ -123,7 +125,7 @@ df["day_period"] = le_day_period.fit_transform(df["day_period"])
 
 
 
-# In[13]:
+# In[4]:
 
 
 from sklearn.ensemble import RandomForestRegressor
@@ -149,15 +151,11 @@ target_col = "arrival_delay_to"
 df_train.rename(columns=lambda x: str(x), inplace=True)
 df_val.rename(columns=lambda x: str(x), inplace=True)
 
-# MODEL
 model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(df_train[feature_cols], df_train[target_col])
 
 
-# In[14]:
-
-
-# In[1]:
+# In[5]:
 
 
 #WAHRSCHEINLICHKEIT
@@ -199,7 +197,7 @@ clf.fit(df_train_cls[feature_cols], df_train_cls["delay_class"])
 # In[ ]:
 
 
-# In[15]:
+# In[6]:
 
 
 import pickle
@@ -212,13 +210,14 @@ with open('model.pkl', 'wb') as f:
 with open('encoders.pkl', 'wb') as f:
     pickle.dump({
         'le_from': le_from,
-        'le_to': le_to
+        'le_to': le_to,
+        'le_day_period': le_day_period,
+        'le_wetter': le_wetter
     }, f)
+
 
 print("Model and encoders saved.")
 
-
-# In[ ]:
 
 
 
@@ -226,7 +225,7 @@ with open('classifier.pkl', 'wb') as f:
     pickle.dump(clf, f)
 
 
-# In[ ]:
+
 
 
 class_mapping = {
