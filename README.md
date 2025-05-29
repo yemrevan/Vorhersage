@@ -15,6 +15,7 @@ Install the required packages:
 
 ```bash
 pip install -r requirements.txt
+```bash
 
 ## Model Files
 
