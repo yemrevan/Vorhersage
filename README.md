@@ -15,29 +15,35 @@ Install the required packages:
 
 ```bash
 pip install -r requirements.txt
-```bash
+```
 
 ## Model Files
 
-Trained models and encoders are stored externally due to file size limitations.
+Trained models and encoders are stored externally due to file size limitations.  
 You can download them from the following link:
+
 [Google Drive Link](https://drive.google.com/drive/folders/1g0-Avh2SPoP_rV5Ef9mGfeEP1D2xF7C9?usp=sharing)
 
 These files include:
 
--model.pkl
--classifier.pkl
--encoders.pkl
--class_mapping.pkl
+- `model.pkl`
+- `classifier.pkl`
+- `encoders.pkl`
+- `class_mapping.pkl`
 
 ## Running the API
-Start the prediction service:
-python predict2.py
 
-It will be available at: http://0.0.0.0:5002/predict
+Start the prediction service:
+
+```bash
+python predict2.py
+```
+
+It will be available at: `http://0.0.0.0:5002/predict`
 
 ## Example Request (JSON)
 
+```json
 [
   [
     {
@@ -53,7 +59,9 @@ It will be available at: http://0.0.0.0:5002/predict
     }
   ]
 ]
+```
 
 ## Notes
--Delay is predicted both in minutes and as probability per category.
--Weather data and holidays are automatically considered if available.
+
+- Delay is predicted both in minutes and as probability per category.
+- Weather data and holidays are automatically considered if available.
