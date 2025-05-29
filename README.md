@@ -16,7 +16,7 @@ Install the required packages:
 ```bash
 pip install -r requirements.txt
 
-### Model Files
+## Model Files
 
 Trained models and encoders are stored externally due to file size limitations.
 You can download them from the following link:
@@ -29,13 +29,13 @@ These files include:
 -encoders.pkl
 -class_mapping.pkl
 
-### Running the API
+## Running the API
 Start the prediction service:
 python predict2.py
 
 It will be available at: http://0.0.0.0:5002/predict
 
-### Example Request (JSON)
+## Example Request (JSON)
 
 [
   [
@@ -53,25 +53,6 @@ It will be available at: http://0.0.0.0:5002/predict
   ]
 ]
 
-### Notes
+## Notes
 -Delay is predicted both in minutes and as probability per category.
 -Weather data and holidays are automatically considered if available.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Sie können auf die .pkl-Dokumente über den Link zugreifen.
-
-[https://drive.google.com/drive/u/0/folders/1g0-Avh2SPoP_rV5Ef9mGfeEP1D2xF7C9](https://drive.google.com/drive/folders/1g0-Avh2SPoP_rV5Ef9mGfeEP1D2xF7C9?usp=sharing)
